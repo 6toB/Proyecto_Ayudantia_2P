@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Estudiante{
+	id			Int @id @default(autoincrement())
+	nombre    	String
+	apellido  	String
+	nivel     	String
+	cedula    	String  @unique
+	tutor		Tutor[]
+	tutorado	Tutorado[]
+	ayudantias	Ayudantia[]
+}
+
+model Tutor {
+  id         	Int          @id @default(autoincrement())
+  especialidad	String
+  reputacion  	String
+  ayudantias  	Ayudantia[]
+  estudianteId	Int			@unique
+  estudiante	Estudiante	@relation(fields: [estudianteId], references: [id])
+}
+
+model Tutorado {
+  id   			Int                 @id @default(autoincrement())
+  reputacion    String
+  ayudantias    Ayudantia[]
+  estudianteId	Int			@unique
+  estudiante	Estudiante	@relation(fields: [estudianteId], references: [id])
+}
+
+model MotivoAyudantia {
+  id          	Int         @id @default(autoincrement())
+  tipo        	String
+  descripcion 	String
+  ayudantia   	Ayudantia?
+}
+
+model Ayudantia {
+  id                 	Int                @id @default(autoincrement())
+  numeroSesiones     	Int
+  fechaCreacion      	DateTime           @default(now())
+  fechaProgramada    	DateTime
+  estudianteId			Int
+  tutorId            	Int
+  tutoradoId         	Int
+  motivoAyudantiaId  	Int                	@unique
+  estudiante			Estudiante			@relation(fields: [estudianteId], references: [id])
+  tutor              	Tutor				@relation(fields: [tutorId], references: [id])
+  tutorado           	Tutorado           	@relation(fields: [tutoradoId], references: [id])
+  motivoAyudantia    	MotivoAyudantia    	@relation(fields: [motivoAyudantiaId], references: [id])
+}
