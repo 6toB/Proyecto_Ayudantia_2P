@@ -5,8 +5,9 @@ import { CreateReasonDto, MotivoDatasource, MotivoEntity, UpdateReasonDto } from
 export class ReasonDatasourceImpl implements MotivoDatasource {
 
   async create( createReasonDto: CreateReasonDto ): Promise<MotivoEntity> {
+    const  { ayudantia, ...dato    } = createReasonDto
     const reason = await prisma.motivoAyudantia.create({
-      data: createReasonDto!
+      data: dato!
     });
 
     return MotivoEntity.fromObject( reason );
