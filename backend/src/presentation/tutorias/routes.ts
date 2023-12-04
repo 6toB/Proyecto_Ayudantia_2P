@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { TutorshipController } from '../tutorias/contoller';
+import { TutorshipsController } from './controller';
+import { TutorshipDatasourceImpl } from '../../infrastructure/datasource/tutoria.datasource.impl';
+import { TutorshipRepositoryImpl } from '../../infrastructure/repositories/tutoria.repository.impl';
 
 
 export class TutorshipRoutes {
@@ -9,18 +11,21 @@ export class TutorshipRoutes {
 
     const router = Router();
 
-    const tutorshipController = new TutorshipController();
+    const datasource = new TutorshipDatasourceImpl();
+    const tutorshipRepository = new TutorshipRepositoryImpl( datasource );
+    const tutorshipController = new TutorshipsController(tutorshipRepository);
 
     router.get('/', tutorshipController.getTutorships );
     router.get('/:id', tutorshipController.getTutorshipById );
     
     router.post('/', tutorshipController.createTutorship );
-
     router.put('/:id', tutorshipController.updateTutorship );
-    
     router.delete('/:id', tutorshipController.deleteTutorship );
 
 
     return router;
   }
+
+
 }
+

@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { ReasonController } from './controller';
+import { ReasonsController } from './controller';
+import { ReasonDatasourceImpl } from '../../infrastructure/datasource/motivo.datasource.impl';
+import { ReasonRepositoryImpl } from '../../infrastructure/repositories/motivo.repository.impl';
 
 
 export class ReasonRoutes {
@@ -9,15 +11,15 @@ export class ReasonRoutes {
 
     const router = Router();
 
-    const reasonController = new ReasonController();
+    const datasource = new ReasonDatasourceImpl();
+    const reasonRepository = new ReasonRepositoryImpl( datasource );
+    const reasonController = new ReasonsController(reasonRepository);
 
     router.get('/', reasonController.getReasons );
     router.get('/:id', reasonController.getReasonById );
     
     router.post('/', reasonController.createReason );
-
     router.put('/:id', reasonController.updateReason );
-    
     router.delete('/:id', reasonController.deleteReason );
 
 

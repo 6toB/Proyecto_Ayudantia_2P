@@ -1,76 +1,70 @@
 import { Request, Response } from 'express';
-import { prisma } from '../../data/postgresql';
-import { CreateStudentDto, UpdateStudentDto} from '../../domain/dtos';
+import { CreateStudentDto, UpdateStudentDto } from '../../domain/dtos';
+import { CreateStudent, DeleteStudent, GetStudent, GetStudents, EstudianteRepository, UpdateStudent } from '../../domain';
 
 
-export class StudentController {
-  
-  constructor() { }
-  public getStudent = async( req: Request, res: Response ) => {
-    const student = await prisma.estudiante.findMany();
-    return res.json( student );
-  };
-  public getStudentById = async( req: Request, res: Response ) => {
-    const id = +req.params.id;
-    if ( isNaN( id ) ) return res.status( 400 ).json( { error: 'ID argument is not a number' } );
+export class StudentsController {
 
-    const student = await prisma.estudiante.findFirst({
-      where: { id }
-    });
-    
-    ( student )
-      ? res.json( student )
-      : res.status( 404 ).json( { error: `Student with id ${ id } not found` } );
-  };
+  //* DI
+  constructor(
+    private readonly estudianteRepository: EstudianteRepository,
+  ) { }
 
-  public createStudent = async( req: Request, res: Response ) => {
-    
-    const [error, createStudentDto] = CreateStudentDto.create(req.body);  
-    if ( error ) return res.status(400).json({ error });
 
-    const student = await prisma.estudiante.create({
-      data: createStudentDto!
-    });
+  public getStudents = ( req: Request, res: Response ) => {
 
-    res.json( student );
+    new GetStudents( this.estudianteRepository )
+      .execute()
+      .then( students => res.json( students ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
 
   };
 
-  public updateStudent = async( req: Request, res: Response ) => {
-    const id = +req.params.id;
-    const [error, updateStudentDto] = UpdateStudentDto.create({...req.body, id});
-    if ( error ) return res.status(400).json({ error });
-    
-    const student = await prisma.estudiante.findFirst({
-      where: { id }
-    });
-
-    if ( !student ) return res.status( 404 ).json( { error: `Student with id ${ id } not found` } );
-
-    const updatedStudent = await prisma.estudiante.update({
-      where: { id },
-      data: updateStudentDto!.values
-    });
-  
-    res.json( updatedStudent );
-
-  }
-  public deleteStudent = async(req:Request, res: Response) => {
+  public getStudentById = ( req: Request, res: Response ) => {
     const id = +req.params.id;
 
-    const student = await prisma.estudiante.findFirst({
-      where: { id }
-    });
+    new GetStudent( this.estudianteRepository )
+      .execute( id )
+      .then( student => res.json( student ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
 
-    if ( !student ) return res.status(404).json({ error: `Student with id ${ id } not found` });
+  };
 
-    const deleted = await prisma.estudiante.delete({
-      where: { id }
-    });
+  public createStudent = ( req: Request, res: Response ) => {
+    const [ error, createStudentDto ] = CreateStudentDto.create( req.body );
+    if ( error ) return res.status( 400 ).json( { error } );
 
-    ( deleted ) 
-      ? res.json( deleted )
-      : res.status(400).json({ error: `Student with id ${ id } not found` });
-    
-  }
-}
+    new CreateStudent( this.estudianteRepository )
+      .execute( createStudentDto! )
+      .then( student => res.json( student ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
+
+
+  };
+
+  public updateStudent = ( req: Request, res: Response ) => {
+    const id = +req.params.id;
+    const [ error, updateStudentDto ] = UpdateStudentDto.create( { ...req.body, id } );
+    if ( error ) return res.status( 400 ).json( { error } );
+
+    new UpdateStudent( this.estudianteRepository )
+      .execute( updateStudentDto! )
+      .then( student => res.json( student ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
+
+  };
+
+
+  public deleteStudent = ( req: Request, res: Response ) => {
+    const id = +req.params.id;
+
+    new DeleteStudent( this.estudianteRepository )
+      .execute( id )
+      .then( student => res.json( student ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
+
+  };
+
+
+
+} 

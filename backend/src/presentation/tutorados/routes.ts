@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { TutoredController } from './controller';
+import { TutoredsController } from './controller';
+import { TutoredDatasourceImpl } from '../../infrastructure/datasource/tutorado.datasource.impl';
+import { TutoredRepositoryImpl } from '../../infrastructure/repositories/tutorado.repository.impl';
 
 
 export class TutoredRoutes {
@@ -9,14 +11,16 @@ export class TutoredRoutes {
 
     const router = Router();
 
-    const tutoredController = new TutoredController();
+    const datasource = new TutoredDatasourceImpl();
+    const tutoredRepository = new TutoredRepositoryImpl( datasource );
+    const tutored = new TutoredsController(tutoredRepository);
 
-    router.get('/', tutoredController.getTutoreds );
-    router.get('/:id', tutoredController.getTutoredById );
+    router.get('/', tutored.getTutoreds );
+    router.get('/:id', tutored.getTutoredById );
     
-    router.post('/', tutoredController.createTutored );
-    router.put('/:id', tutoredController.updateTutored );
-    router.delete('/:id', tutoredController.deleteTutored );
+    router.post('/', tutored.createTutored );
+    router.put('/:id', tutored.updateTutored );
+    router.delete('/:id', tutored.deleteTutored );
 
 
     return router;
@@ -24,4 +28,3 @@ export class TutoredRoutes {
 
 
 }
-

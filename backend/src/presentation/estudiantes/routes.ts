@@ -1,49 +1,27 @@
 import { Router } from 'express';
-import { StudentController } from './controller';
+import { StudentsController } from './controller';
+import { EstudianteDatasourceImpl } from '../../infrastructure/datasource/estudiante.datasource.impl';
+import { StudentRepositoryImpl } from '../../infrastructure/repositories/estudiante.repository.impl';
+
 
 export class StudentRoutes {
+
 
   static get routes(): Router {
 
     const router = Router();
 
-    const studentController = new StudentController();
+    const datasource = new EstudianteDatasourceImpl();
+    const studentRepository = new StudentRepositoryImpl( datasource );
+    const studentController = new StudentsController(studentRepository);
 
-    /**
-     * @swagger
-     * /students:
-     *    get:
-     *         description: A list of students.
-     */
-    router.get('/', studentController.getStudent );
-    /**
-     * @swagger
-     * /students/{id}:
-     *    get:
-     *         description: Numeric ID of the student to retrieve
-     */
+    router.get('/', studentController.getStudents );
     router.get('/:id', studentController.getStudentById );
-    /**
-     * @swagger
-     * /students:
-     *   post:
-     *     summary: Create a new student
-     */
+    
     router.post('/', studentController.createStudent );
-    /**
-     * @swagger
-     * /students/{id}:
-     *   put:
-     *     summary: Update a student by ID
-     */
     router.put('/:id', studentController.updateStudent );
-    /**
-     * @swagger
-     * /students/{id}:
-     *   delete:
-     *     summary: Delete a student by ID
-     */
     router.delete('/:id', studentController.deleteStudent );
+
 
     return router;
   }

@@ -1,99 +1,70 @@
 import { Request, Response } from 'express';
-import { prisma } from '../../data/postgresql';
 import { CreateTutoredDto, UpdateTutoredDto } from '../../domain/dtos';
+import { CreateTutored, DeleteTutored, GetTutored, GetTutoreds, TutoradoRepository, UpdateTutored } from '../../domain';
 
 
-export class TutoredController {
-  
-  constructor() { }
-  public getTutoreds = async( req: Request, res: Response ) => {
-    const tutoreds = await prisma.tutorado.findMany();
-    return res.json( tutoreds );
-  };
-  public getTutoredById = async( req: Request, res: Response ) => {
-    const id = +req.params.id;
-    if ( isNaN( id ) ) return res.status( 400 ).json( { error: 'ID argument is not a number' } );
+export class TutoredsController {
 
-    const tutored = await prisma.tutorado.findFirst({
-      where: { id }
-    });
-    
-    ( tutored )
-      ? res.json( tutored )
-      : res.status( 404 ).json( { error: `Tutored with id ${ id } not found` } );
-  };
-  /*
-  public createTutored = async( req: Request, res: Response ) => {
-    const {estudianteId, reputacion} = req.body;
-  
-    const estudiante = await prisma.estudiante.findFirst({
-      where: { id: estudianteId }
-    });
-  
-    if (!estudiante) {
-      return res.status(404).json({ error: `Estudiante with id ${estudianteId} not found` });
-    }
-  
-    const [error, createTutoredDto] = CreateTutoredDto.create({estudianteId, reputacion});
-    
-    if ( error ) return res.status(400).json({ error });
-  
-    const tutored = await prisma.tutorado.create({
-      data: createTutoredDto!
-    });
-  
-    res.json( tutored );
-  };
-  */
-  public createTutored = async( req: Request, res: Response ) => {
-    
-    const [error, createTutoredDto] = CreateTutoredDto.create(req.body);
-    if ( error ) return res.status(400).json({ error });
+  //* DI
+  constructor(
+    private readonly tutoredRepository: TutoradoRepository,
+  ) { }
 
-    const tutored = await prisma.tutorado.create({
-      data: createTutoredDto!
-    });
 
-    res.json( tutored );
+  public getTutoreds = ( req: Request, res: Response ) => {
+
+    new GetTutoreds( this.tutoredRepository )
+      .execute()
+      .then( tutoreds => res.json( tutoreds ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
 
   };
 
-  public updateTutored = async( req: Request, res: Response ) => {
-    const id = +req.params.id;
-    const [error, updateTutoredDto] = UpdateTutoredDto.create({...req.body, id});
-    if ( error ) return res.status(400).json({ error });
-    
-    const tutored = await prisma.tutorado.findFirst({
-      where: { id }
-    });
-
-    if ( !tutored ) return res.status( 404 ).json( { error: `Tutored with id ${ id } not found` } );
-
-    const updatedTutored = await prisma.tutorado.update({
-      where: { id },
-      data: updateTutoredDto!.values
-    });
-  
-    res.json( updatedTutored );
-
-  }
-  public deleteTutored = async(req:Request, res: Response) => {
+  public getTutoredById = ( req: Request, res: Response ) => {
     const id = +req.params.id;
 
-    const tutored = await prisma.tutorado.findFirst({
-      where: { id }
-    });
+    new GetTutored( this.tutoredRepository )
+      .execute( id )
+      .then( tutored => res.json( tutored ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
 
-    if ( !tutored ) return res.status(404).json({ error: `Tutored with id ${ id } not found` });
+  };
 
-    const deleted = await prisma.tutorado.delete({
-      where: { id }
-    });
+  public createTutored = ( req: Request, res: Response ) => {
+    const [ error, createTutoredDto ] = CreateTutoredDto.create( req.body );
+    if ( error ) return res.status( 400 ).json( { error } );
 
-    ( deleted ) 
-      ? res.json( deleted )
-      : res.status(400).json({ error: `Tutored with id ${ id } not found` });
-    
+    new CreateTutored( this.tutoredRepository )
+      .execute( createTutoredDto! )
+      .then( tutored => res.json( tutored ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
 
-  }
-}
+
+  };
+
+  public updateTutored = ( req: Request, res: Response ) => {
+    const id = +req.params.id;
+    const [ error, updateTutoredDto ] = UpdateTutoredDto.create( { ...req.body, id } );
+    if ( error ) return res.status( 400 ).json( { error } );
+
+    new UpdateTutored( this.tutoredRepository )
+      .execute( updateTutoredDto! )
+      .then( tutored => res.json( tutored ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
+
+  };
+
+
+  public deleteTutored = ( req: Request, res: Response ) => {
+    const id = +req.params.id;
+
+    new DeleteTutored( this.tutoredRepository )
+      .execute( id )
+      .then( tutored => res.json( tutored ) )
+      .catch( error => res.status( 400 ).json( { error } ) );
+
+  };
+
+
+
+} 
