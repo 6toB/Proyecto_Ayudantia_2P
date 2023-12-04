@@ -5,6 +5,7 @@ export class UpdateTutorshipDto {
     private constructor(
       public readonly id: number,
       public readonly numeroSesiones: number,
+      public readonly fechaCreacion: string,
       public readonly fechaProgramada: string,
       public readonly estudianteId: number,
       public readonly tutorId: number,
@@ -17,6 +18,7 @@ export class UpdateTutorshipDto {
   
       if ( this.id ) returnObj.id = this.id;
       if ( this.numeroSesiones ) returnObj.numeroSesiones = this.numeroSesiones;
+      if ( this.fechaCreacion ) returnObj.fechaCreacion = this.fechaCreacion;
       if ( this.fechaProgramada ) returnObj.fechaProgramada = this.fechaProgramada;
       if ( this.estudianteId ) returnObj.estudianteId = this.estudianteId;
       if ( this.tutorId ) returnObj.tutorId = this.tutorId;
@@ -29,16 +31,16 @@ export class UpdateTutorshipDto {
   
     static create( props: {[key:string]: any} ): [string?, UpdateTutorshipDto?]  {
   
-      const { id, numeroSesiones, fechaProgramada, estudianteId, tutorId, tutoradoId, motivoAyudantiaId } = props;
+      const { id, numeroSesiones, fechaProgramada, estudianteId, tutorId, tutoradoId, motivoAyudantiaId, fechaCreacion } = props;
   
       if ( !id || isNaN( Number(id)) ) {
         return ['id must be a valid number'];
       }
   
-      if ( !numeroSesiones && !fechaProgramada && !estudianteId && !tutorId && !tutoradoId && !motivoAyudantiaId ) {
+      if ( !numeroSesiones && !fechaProgramada && !estudianteId && !tutorId && !tutoradoId && !motivoAyudantiaId && !motivoAyudantiaId ) {
         return ['At least one property must be provided'];
       }
-      return [undefined, new UpdateTutorshipDto(id, numeroSesiones, fechaProgramada, estudianteId, tutorId, tutoradoId, motivoAyudantiaId)];
+      return [undefined, new UpdateTutorshipDto(id, numeroSesiones, fechaCreacion, fechaProgramada, estudianteId, tutorId, tutoradoId, motivoAyudantiaId)];
     }
   
   
